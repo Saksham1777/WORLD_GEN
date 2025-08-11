@@ -21,6 +21,7 @@ def print_header():
     )
     print("="*20)
 
+
 def print_response(result: dict, user_input: str):
     """Render the agent decision and answer."""
     print(f"\n YOUR Input: {user_input}")
@@ -34,6 +35,7 @@ def print_response(result: dict, user_input: str):
     print(f" RESPONSE:")
     print(result['response'])
     print("="*70)
+
 
 def main():
     
@@ -58,9 +60,12 @@ def main():
                     print("\n Thanks for using the Multi-Agent System!")
                     break
                 
-                # Process the request through our agent network
-                result = orchestrator.process_request(user_input)
+                # Process the request through the agent network
+                result = orchestrator.process_request(user_input, thread_id=1)
+                print("-" * 70)
+                print("Answering your question...\n")
                 print_response(result, user_input)
+                print("-" * 70)
                 
             except KeyboardInterrupt:
                 print("\n\n Session ended by user. Goodbye!")
@@ -74,4 +79,5 @@ def main():
         print("Please check your API key and internet connection.")
 
 if __name__ == "__main__":
+
     main()
