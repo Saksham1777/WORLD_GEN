@@ -16,6 +16,9 @@ class AgentSelector:
         self.available_agents = {
             "GeographyAgent" : GeographyAgent(self.llm),
             "CultureAgent"   : CultureAgent(self.llm),
+            "LoreAgent" : LoreAgent(self.llm),
+            "EconomicsAgent": EconomicsAgent(self.llm),
+            "PoliticsAgent": PoliticsAgent(self.llm)
         }
 
     def select_agent(self, state:AgentState) -> AgentState:
@@ -45,6 +48,9 @@ class AgentSelector:
              Available agents and their specializations:
                 1. GeographyAgent: {geo_agent_desc}
                 2. CultureAgent: {culture_agent_desc}
+                3. LoreAgent: {lore_agent_desc}
+                4. PoliticsAgent: {politics_agent_desc}
+                5. EconomicsAgent: {economics_agent_desc}
              CRITICAL: Respond with ONLY valid JSON in this EXACT format:
                 {{"selected_agent": "GeographyAgent", "reasoning": "your reason here"}}
                 OR
@@ -63,6 +69,9 @@ class AgentSelector:
         formated_prompt = selector_prompt.format_messages(
                 geo_agent_desc = agent_descriptions["GeographyAgent"],
                 culture_agent_desc = agent_descriptions["CultureAgent"],
+                lore_agent_desc = agent_descriptions["LoreAgent"],
+                politics_agent_desc = agent_descriptions["PoliticsAgent"],
+                economics_agent_desc = agent_descriptions["EconomicsAgent"],
                 input = state["input_prompt"]
         )
 
@@ -110,20 +119,44 @@ class AgentSelector:
         
     def _fallback_selection(self, input_text: str) -> str:
         text_lower = input_text.lower()
-    
+
         # Geography keywords
         geography_keywords = ["geography", "terrain", "world", "rocky", "mountain", "desert", "forest"]
+        
         # Culture keywords  
         culture_keywords = ["culture", "people", "society", "community", "tradition"]
-        
+
+        # Lore keywords
+        lore_keywords = ["story", "lore","plot", "tale", "history"]
+
+        # Economics keywords
+        ecnomics_keywords = ["economics", "trade", "market", "resources", "wealth"]
+
+        # Politics keywords
+        politics_keywords = ["politics", "government", "power", "leadership", "authority"]
+
         # Count keyword matches
         geography_score = sum(1 for keyword in geography_keywords if keyword in text_lower)
         culture_score = sum(1 for keyword in culture_keywords if keyword in text_lower)
-        
-        # Making a decision based on the strongest signal
-        if geography_score > culture_score:
-            return "GeographyAgent"
-        elif culture_score > 0:
-            return "CultureAgent"
-        else:
-            return "GeographyAgent" # Default fallback
+        lore_score = sum(1 for keyword in lore_keywords if keyword in text_lower)
+        ecnomics_score = sum(1 for keyword in ecnomics_keywords if keyword in text_lower)
+        politics_score = sum(1 for keyword in politics_keywords if keyword in text_lower)
+
+        # Store scores in a dictionary
+        scores = {
+                "GeographyAgent": geography_score,
+                "CultureAgent": culture_score,
+                "LoreAgent": lore_score,
+                "EcnomicsAgent": ecnomics_score,
+                "PoliticsAgent": politics_score
+        }
+
+        score_values = list(scores.values())
+
+        # Edge case: all scores are the same (including all zeros)
+        if score_values.count(score_values[0]) == len(score_values):
+            return "LoreAgent"
+
+        # Otherwise, select agent with highest score
+        agent_selected = max(scores, key=scores.get)
+        return agent_selected
