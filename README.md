@@ -87,10 +87,13 @@ WORLD_GEN/
 ```
 
 ## Installation
+```
 pip install langgraph langchain-google-genai langchain-core typing-extensions
+```
 
 ## Usage Example
 Set the .env file with your free gemini api key.
+
 **Run the application**
 ```
 python main.py
